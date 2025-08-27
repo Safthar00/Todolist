@@ -3,249 +3,858 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do List App</title>
+    <title>Super To-Do List</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #4a5568 #1a202c;
+        }
+
+        *::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: #1a202c;
+            border-radius: 3px;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 3px;
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #b6d5f5;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background-attachment: fixed;
             min-height: 100vh;
         }
+
+        .glassmorphism {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+
         .task-item {
-            transition: all 0.2s ease;
-            border-radius: 6px;
-        }
-        .task-item.completed {
-            background-color: #f3f4f6;
-            opacity: 0.7;
-        }
-        .task-item.completed span {
-            text-decoration: line-through;
-        }
-        .task-description {
-            display: none;
-            font-size: 0.875rem;
-            color: #4b5563;
-        }
-        .task-item:hover .task-description {
-            display: block;
-        }
-        .toast {
-            transition: opacity 0.5s ease;
-        }
-        .animate-spin {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-        .dropdown {
-            transition: all 0.3s ease;
-            max-height: 0;
-            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInUp 0.5s ease-out;
+            position: relative;
             overflow: hidden;
         }
-        .dropdown.open {
-            max-height: 500px;
-            opacity: 1;
+
+        .task-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .task-item:hover::before {
+            left: 100%;
+        }
+
+        .task-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .task-item.completed {
+            transform: scale(0.98);
+            opacity: 0.7;
+        }
+
+        .priority-high {
+            border-left: 4px solid #ef4444;
+        }
+
+        .priority-medium {
+            border-left: 4px solid #9c9c9a;
+        }
+
+        .priority-low {
+            border-left: 4px solid #10b981;
+        }
+
+        .floating-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .floating-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .animate-in {
+            animation: modalIn 0.3s ease-out;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-gradient {
+            background: var(--gradient);
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .time-display {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stats-card {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .floating-button {
+                bottom: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        .search-highlight {
+            background-color: #7c7d7e;
+            color: #000;
+            padding: 1px 2px;
+            border-radius: 2px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+
+        .progress-ring {
+            transition: stroke-dasharray 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Custom Select Dropdown Styling */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+            
+            padding-right: 3rem !important;
+            color: white !important;
+            cursor: pointer;
+        }
+
+        select option {
+            background-color: #0f172a !important;
+            color: white !important;
+            padding: 0.75rem !important;
+            border: none !important;
+        }
+
+        select option:hover {
+            background-color: #1e293b !important;
+        }
+
+        select option:checked {
+            background-color: #4f46e5 !important;
+            color: white !important;
+        }
+
+        @-moz-document url-prefix() {
+            select {
+                color: white !important;
+                background-color: rgba(0, 0, 0, 0.2) !important;
+            }
+            
+            select option {
+                background-color: #1e293b !important;
+                color: white !important;
+            }
+            
+            select option:hover {
+                background-color: #334155 !important;
+            }
+        }
+
+        @media screen and (-webkit-min-device-pixel-ratio:0) {
+            select {
+                color: white !important;
+            }
+            
+            select option {
+                background: #1e293b !important;
+                color: white !important;
+            }
+        }
+
+        select::-ms-expand {
+            display: none;
+        }
+
+        select.custom-select {
+            color: white !important;
+            background-color: rgba(0, 0, 0, 0.2) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        }
+
+        select::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        select::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        select::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        select::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        select:focus {
+            outline: none !important;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3) !important;
+            border-color: rgba(255, 255, 255, 0.4) !important;
         }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <h1 class="text-2xl font-semibold text-center text-gray-800 mb-6">To-Do List</h1>
-        <div class="mb-4">
-            <input id="taskInput" type="text" placeholder="Task title" class="w-full p-2 mb-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-            <textarea id="taskDescription" placeholder="Task description" class="w-full p-2 mb-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none" rows="3"></textarea>
-            <button onclick="addTask()" class="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors flex items-center justify-center">
-                <span id="addButtonText">Add Task</span>
-                <svg id="loadingSpinner" class="hidden h-5 w-5 ml-2 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 0116 0 8 8 0 01-16 0z" />
+<body>
+    <!-- Main Container -->
+    <div class="min-h-screen py-8 px-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header Section -->
+            <div class="text-center mb-8">
+                <h1 class="text-5xl md:text-6xl font-bold text-blue-900 mb-4">
+                    To-Do List</span>
+                </h1>
+                <p class="text-white/80 text-lg">Organize your life with style and efficiency</p>
+                
+                <!-- Live Clock -->
+                <div id="liveClock" class="time-display rounded-2xl p-4 mt-6 text-white text-xl font-medium inline-block">
+                    <i class="fas fa-clock mr-2"></i>
+                    <span id="currentTime"></span>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="stats-card rounded-2xl p-4 text-center card-hover">
+                    <div class="text-2xl font-bold text-white" id="totalTasks">0</div>
+                    <div class="text-white/70 text-sm">Total Tasks</div>
+                </div>
+                <div class="stats-card rounded-2xl p-4 text-center card-hover">
+                    <div class="text-2xl font-bold text-green-400" id="completedTasks">0</div>
+                    <div class="text-white/70 text-sm">Completed</div>
+                </div>
+                <div class="stats-card rounded-2xl p-4 text-center card-hover">
+                    <div class="text-2xl font-bold text-yellow-400" id="pendingTasks">0</div>
+                    <div class="text-white/70 text-sm">Pending</div>
+                </div>
+                <div class="stats-card rounded-2xl p-4 text-center card-hover">
+                    <div class="text-2xl font-bold text-blue-400" id="completionRate">0%</div>
+                    <div class="text-white/70 text-sm">Completion</div>
+                </div>
+            </div>
+
+            <!-- Progress Circle -->
+            <div class="text-center mb-8">
+                <svg width="120" height="120" class="mx-auto">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
+                    <circle id="progressCircle" cx="60" cy="60" r="50" fill="none" stroke="#4facfe" stroke-width="8" 
+                            stroke-linecap="round" class="progress-ring" stroke-dasharray="0 314"/>
                 </svg>
-            </button>
+                <div class="text-white mt-2">Daily Progress</div>
+            </div>
+
+            <!-- Main Todo Container -->
+            <div class="glassmorphism rounded-3xl p-6 md:p-8 card-hover">
+                <!-- Search and Filter Bar -->
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                            <input 
+                                id="searchInput" 
+                                type="text" 
+                                placeholder="Search tasks..." 
+                                class="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+                            />
+                        </div>
+                    </div>
+                    <select id="filterSelect" class="px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                        <option value="all">All Tasks</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="high">High Priority</option>
+                        <option value="medium">Medium Priority</option>
+                        <option value="low">Low Priority</option>
+                        <option value="today">Due Today</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+
+                <!-- Quick Add Task -->
+                <div class="mb-6">
+                    <div class="flex gap-2">
+                        <input 
+                            id="quickTaskInput" 
+                            type="text" 
+                            placeholder="Quick add task..." 
+                            class="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+                            onkeypress="handleQuickAdd(event)"
+                        />
+                        <button onclick="quickAddTask()" class="btn-gradient px-6 py-3 rounded-xl text-white font-medium hover:scale-105 transition-transform">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Task List -->
+                <div id="taskContainer" class="space-y-3 max-h-96 overflow-y-auto">
+                    <!-- Tasks will be populated here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="text-center py-12 hidden">
+                    <i class="fas fa-tasks text-6xl text-white/20 mb-4"></i>
+                    <h3 class="text-xl text-white/70 mb-2">No tasks yet!</h3>
+                    <p class="text-white/50">Add your first task to get started</p>
+                </div>
+            </div>
         </div>
-        <button onclick="toggleTaskList()" id="toggleButton" class="w-full bg-blue-100 text-blue-800 p-2 rounded-md hover:bg-blue-200 transition-colors mb-4 flex items-center justify-between">
-            <span>Tasks</span>
-            <svg id="toggleIcon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-        </button>
-        <ul id="taskList" class="dropdown space-y-2"></ul>
-        <div id="toast" class="fixed bottom-4 right-4 bg-blue-500 text-white px-4 py-2 rounded-md opacity-0 pointer-events-none"></div>
+    </div>
+
+    <!-- Floating Add Button -->
+    <button id="floatingAdd" class="floating-button text-white text-xl">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Advanced Task Modal -->
+    <div id="taskModal" class="fixed inset-0 bg-black/50 modal hidden items-center justify-center z-50 p-4">
+        <div class="glassmorphism rounded-3xl p-6 w-full max-w-md animate-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">Add New Task</h2>
+                <button onclick="closeModal()" class="text-white/70 hover:text-white text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="taskForm" class="space-y-4">
+                <div>
+                    <input 
+                        id="taskTitle" 
+                        type="text" 
+                        placeholder="Task title" 
+                        class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+                        required
+                    />
+                </div>
+                
+                <div>
+                    <textarea 
+                        id="taskDescription" 
+                        placeholder="Task description" 
+                        rows="3"
+                        class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 resize-none"
+                    ></textarea>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-white/70 text-sm mb-2">Priority</label>
+                        <select id="taskPriority" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-white/70 text-sm mb-2">Category</label>
+                        <select id="taskCategory" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <option value="personal">Personal</option>
+                            <option value="work">Work</option>
+                            <option value="health">Health</option>
+                            <option value="study">Study</option>
+                            <option value="shopping">Shopping</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-white/70 text-sm mb-2">Due Date</label>
+                    <input 
+                        id="taskDueDate" 
+                        type="datetime-local" 
+                        class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+                    />
+                </div>
+                
+                <div class="flex gap-4 pt-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 px-6 py-3 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 btn-gradient px-6 py-3 rounded-xl text-white font-medium hover:scale-105 transition-transform">
+                        Add Task
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script type="module">
+        
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
 
-        // Firebase configuration
-        const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyBq9z2rrH7xMwhnjyYzVKot36ekvsa4X4o",
+    authDomain: "todolist-d63ce.firebaseapp.com",
+    projectId: "todolist-d63ce",
+    storageBucket: "todolist-d63ce.firebasestorage.app",
+    messagingSenderId: "696580055388",
+    appId: "1:696580055388:web:d92dfdaa735f142971e199"
 };
 
-        // Initialize Firebase
-        let db;
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            console.log('Firebase initialized successfully, db:', db);
-        } catch (error) {
-            console.error('Firebase initialization failed:', error.message, error.code);
-            showToast(`Failed to initialize Firebase: ${error.message}`, true);
-            document.getElementById('taskList').innerHTML = '<li class="text-center text-red-500">Firebase not initialized. Check console for details.</li>';
+// Initialize Firebase
+let db;
+let tasks = [];
+
+try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    loadTasks();
+} catch (error) {
+    console.error('Firebase initialization failed:', error);
+    showNotification('Failed to initialize Firebase', 'error');
+}
+
+// Update live clock
+function updateClock() {
+    const now = new Date();
+    const options = { 
+        weekday: 'short', 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit', 
+        minute: '2-digit',
+        second: '2-digit'
+    };
+    document.getElementById('currentTime').textContent = now.toLocaleDateString('en-US', options);
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+
+// Show notification
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-xl text-white font-medium transform translate-x-full transition-transform duration-300 z-50 ${
+        type === 'error' ? 'bg-red-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-green-500'
+    }`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Modal functions
+window.openModal = function() {
+    document.getElementById('taskModal').classList.remove('hidden');
+    document.getElementById('taskModal').classList.add('flex');
+    document.getElementById('taskTitle').focus();
+};
+
+window.closeModal = function() {
+    document.getElementById('taskModal').classList.add('hidden');
+    document.getElementById('taskModal').classList.remove('flex');
+    document.getElementById('taskForm').reset();
+};
+
+// Event listeners
+document.getElementById('floatingAdd').addEventListener('click', openModal);
+document.getElementById('taskForm').addEventListener('submit', handleFormSubmit);
+
+// Quick add task
+window.quickAddTask = function() {
+    const input = document.getElementById('quickTaskInput');
+    const title = input.value.trim();
+    if (title) {
+        addTask({
+            text: title,
+            description: '',
+            priority: 'medium',
+            category: 'personal',
+            dueDate: null
+        });
+        input.value = '';
+    }
+};
+
+window.handleQuickAdd = function(event) {
+    if (event.key === 'Enter') {
+        quickAddTask();
+    }
+};
+
+// Handle form submit
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    const title = document.getElementById('taskTitle').value.trim();
+    const description = document.getElementById('taskDescription').value.trim();
+    const priority = document.getElementById('taskPriority').value;
+    const category = document.getElementById('taskCategory').value;
+    const dueDate = document.getElementById('taskDueDate').value;
+
+    if (!title) {
+        showNotification('Task title is required', 'error');
+        return;
+    }
+
+    await addTask({
+        text: title,
+        description,
+        priority,
+        category,
+        dueDate: dueDate ? new Date(dueDate) : null
+    });
+
+    closeModal();
+}
+
+// Add task to Firestore
+async function addTask(taskData) {
+    if (!db) {
+        showNotification('Database not available', 'error');
+        return;
+    }
+
+    try {
+        await addDoc(collection(db, 'tasks'), {
+            ...taskData,
+            completed: false,
+            createdAt: serverTimestamp()
+        });
+        showNotification('Task added successfully!');
+    } catch (error) {
+        console.error('Error adding task:', error);
+        showNotification('Failed to add task', 'error');
+    }
+}
+
+// Load tasks from Firestore
+function loadTasks() {
+    if (!db) return;
+
+    try {
+        const q = query(collection(db, 'tasks'), orderBy('createdAt', 'desc'));
+        onSnapshot(q, (snapshot) => {
+            tasks = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            renderTasks();
+            updateStats();
+        });
+    } catch (error) {
+        console.error('Error loading tasks:', error);
+        showNotification('Failed to load tasks', 'error');
+    }
+}
+
+// Render tasks
+function renderTasks() {
+    const container = document.getElementById('taskContainer');
+    const emptyState = document.getElementById('emptyState');
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const filter = document.getElementById('filterSelect').value;
+
+    let filteredTasks = tasks.filter(task => {
+        const matchesSearch = task.text.toLowerCase().includes(searchTerm) || 
+                            (task.description && task.description.toLowerCase().includes(searchTerm));
+        
+        if (!matchesSearch) return false;
+
+        switch (filter) {
+            case 'pending':
+                return !task.completed;
+            case 'completed':
+                return task.completed;
+            case 'high':
+            case 'medium':
+            case 'low':
+                return task.priority === filter;
+            case 'today':
+                if (!task.dueDate) return false;
+                const today = new Date();
+                const dueDate = task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate);
+                return dueDate.toDateString() === today.toDateString();
+            case 'overdue':
+                if (!task.dueDate || task.completed) return false;
+                const now = new Date();
+                const due = task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate);
+                return due < now;
+            default:
+                return true;
         }
+    });
 
-        // Show toast notification
-        function showToast(message, isError = false) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-md ${isError ? 'bg-red-500' : 'bg-blue-500'} text-white opacity-100`;
-            setTimeout(() => {
-                toast.classList.remove('opacity-100');
-                toast.classList.add('opacity-0');
-            }, 2000);
-        }
+    if (filteredTasks.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+    } else {
+        emptyState.classList.add('hidden');
+        container.innerHTML = filteredTasks.map(task => createTaskElement(task)).join('');
+    }
+}
 
-        // Toggle task list dropdown
-        window.toggleTaskList = function() {
-            const taskList = document.getElementById('taskList');
-            const toggleButton = document.getElementById('toggleButton');
-            const toggleIcon = document.getElementById('toggleIcon');
-            taskList.classList.toggle('open');
-            toggleButton.classList.toggle('bg-blue-200');
-            toggleIcon.innerHTML = taskList.classList.contains('open') ?
-                `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />` :
-                `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />`;
-        };
+// Create task element
+function createTaskElement(task) {
+    const isOverdue = task.dueDate && !task.completed && 
+                     (task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate)) < new Date();
+    
+    const dueText = task.dueDate ? 
+        (task.dueDate.toDate ? task.dueDate.toDate() : new Date(task.dueDate)).toLocaleDateString() : '';
 
-        // Add task to Firestore
-        window.addTask = async function() {
-            if (!db) {
-                showToast('Firestore not initialized.', true);
-                return;
-            }
-            const taskInput = document.getElementById('taskInput');
-            const taskDescription = document.getElementById('taskDescription');
-            const addButtonText = document.getElementById('addButtonText');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const taskText = taskInput.value.trim();
-            const descriptionText = taskDescription.value.trim();
+    const priorityColors = {
+        high: 'bg-red-500',
+        medium: 'bg-gray-500',
+        low: 'bg-green-500'
+    };
 
-            if (taskText === '') {
-                showToast('Task title cannot be empty!', true);
-                return;
-            }
+    const categoryColors = {
+        personal: 'bg-purple-500',
+        work: 'bg-blue-500',
+        health: 'bg-pink-500',
+        study: 'bg-indigo-500',
+        shopping: 'bg-teal-500'
+    };
 
-            try {
-                addButtonText.classList.add('hidden');
-                loadingSpinner.classList.remove('hidden');
-                await addDoc(collection(db, 'tasks'), {
-                    text: taskText,
-                    description: descriptionText,
-                    completed: false,
-                    createdAt: serverTimestamp()
-                });
-                taskInput.value = '';
-                taskDescription.value = '';
-                showToast('Task added successfully!');
-            } catch (error) {
-                console.error('Error adding task:', error.message, error.code);
-                showToast(`Failed to add task: ${error.message}`, true);
-            } finally {
-                addButtonText.classList.remove('hidden');
-                loadingSpinner.classList.add('hidden');
-            }
-        };
+    return `
+        <div class="task-item glassmorphism rounded-2xl p-4 priority-${task.priority} ${task.completed ? 'completed' : ''} ${isOverdue ? 'border-red-400' : ''}">
+            <div class="flex items-start gap-4">
+                <button onclick="toggleTask('${task.id}', ${task.completed})" class="mt-1">
+                    <div class="w-6 h-6 rounded-full border-2 border-white/40 flex items-center justify-center ${task.completed ? 'bg-green-500 border-green-500' : 'hover:border-white/60'}">
+                        ${task.completed ? '<i class="fas fa-check text-white text-xs"></i>' : ''}
+                    </div>
+                </button>
+                
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <h3 class="text-white font-medium ${task.completed ? 'line-through opacity-60' : ''}">${highlightSearch(task.text)}</h3>
+                        <span class="category-tag ${categoryColors[task.category]} text-white text-xs">${task.category}</span>
+                        <span class="w-2 h-2 rounded-full ${priorityColors[task.priority]}"></span>
+                    </div>
+                    
+                    ${task.description ? `<p class="text-white/70 text-sm mb-2 ${task.completed ? 'line-through opacity-60' : ''}">${highlightSearch(task.description)}</p>` : ''}
+                    
+                    <div class="flex items-center justify-between text-xs text-white/50">
+                        <div class="flex items-center gap-4">
+                            ${task.dueDate ? `<span class="${isOverdue ? 'text-red-400' : ''}"><i class="fas fa-calendar mr-1"></i>${dueText}</span>` : ''}
+                            <span><i class="fas fa-clock mr-1"></i>${formatCreatedAt(task.createdAt)}</span>
+                        </div>
+                        <button onclick="deleteTask('${task.id}')" class="text-red-400 hover:text-red-300 transition-colors p-1">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
 
-        // Load tasks from Firestore
-        function loadTasks() {
-            const taskList = document.getElementById('taskList');
-            taskList.innerHTML = '<li class="text-center text-gray-500">Loading tasks...</li>';
+// Highlight search terms
+function highlightSearch(text) {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    if (!searchTerm) return text;
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    return text.replace(regex, '<span class="search-highlight">$1</span>');
+}
 
-            if (!db) {
-                console.error('Error loading tasks: Firestore not initialized');
-                taskList.innerHTML = '<li class="text-center text-red-500">Firestore not initialized. Check Firebase config.</li>';
-                showToast('Firestore not initialized.', true);
-                return;
-            }
+// Format created date
+function formatCreatedAt(timestamp) {
+    if (!timestamp) return '';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString();
+}
 
-            try {
-                console.log('Starting loadTasks, db:', db);
-                const q = query(collection(db, 'tasks'), orderBy('createdAt', 'desc'));
-                onSnapshot(q, (snapshot) => {
-                    console.log('Snapshot received:', snapshot.docs.length, 'tasks');
-                    taskList.innerHTML = '';
-                    if (snapshot.empty) {
-                        taskList.innerHTML = '<li class="text-center text-gray-500">No tasks yet!</li>';
-                    }
-                    snapshot.forEach(doc => {
-                        const task = doc.data();
-                        const li = document.createElement('li');
-                        li.className = `task-item flex flex-col p-3 bg-white rounded-md shadow-sm hover:shadow-md ${task.completed ? 'completed' : ''}`;
-                        li.innerHTML = `
-                            <div class="flex justify-between items-center">
-                                <span onclick="toggleTask('${doc.id}', ${task.completed})" class="cursor-pointer font-medium text-gray-800">${task.text}</span>
-                                <button onclick="deleteTask('${doc.id}')" class="text-red-500 hover:text-red-600 transition-colors">Delete</button>
-                            </div>
-                            ${task.description ? `<div class="task-description mt-1">${task.description}</div>` : ''}
-                        `;
-                        taskList.appendChild(li);
-                    });
-                }, (error) => {
-                    console.error('Error in onSnapshot:', error.message, error.code);
-                    taskList.innerHTML = '<li class="text-center text-red-500">Error loading tasks!</li>';
-                    showToast(`Failed to load tasks: ${error.message}`, true);
-                });
-            } catch (error) {
-                console.error('Error loading tasks:', error.message, error.code);
-                taskList.innerHTML = '<li class="text-center text-red-500">Error loading tasks!</li>';
-                showToast(`Failed to load tasks: ${error.message}`, true);
-            }
-        }
+// Toggle task completion
+window.toggleTask = async function(id, completed) {
+    if (!db) return;
 
-        // Toggle task completion
-        window.toggleTask = async function(id, completed) {
-            if (!db) {
-                showToast('Firestore not initialized.', true);
-                return;
-            }
-            try {
-                await updateDoc(doc(db, 'tasks', id), {
-                    completed: !completed
-                });
-                showToast('Task updated!');
-            } catch (error) {
-                console.error('Error updating task:', error.message, error.code);
-                showToast(`Failed to update task: ${error.message}`, true);
-            }
-        };
+    try {
+        await updateDoc(doc(db, 'tasks', id), {
+            completed: !completed
+        });
+        showNotification(completed ? 'Task marked as pending' : 'Task completed!');
+    } catch (error) {
+        console.error('Error updating task:', error);
+        showNotification('Failed to update task', 'error');
+    }
+};
 
-        // Delete task
-        window.deleteTask = async function(id) {
-            if (!db) {
-                showToast('Firestore not initialized.', true);
-                return;
-            }
-            try {
-                await deleteDoc(doc(db, 'tasks', id));
-                showToast('Task deleted!');
-            } catch (error) {
-                console.error('Error deleting task:', error.message, error.code);
-                showToast(`Failed to delete task: ${error.message}`, true);
-            }
-        };
+// Delete task
+window.deleteTask = async function(id) {
+    if (!db) return;
+    
+    if (!confirm('Are you sure you want to delete this task?')) return;
 
-        // Load tasks on page load
-        if (db) {
-            loadTasks();
-        } else {
-            document.getElementById('taskList').innerHTML = '<li class="text-center text-red-500">Firestore not initialized. Check Firebase config.</li>';
-        }
-    </script>
+    try {
+        await deleteDoc(doc(db, 'tasks', id));
+        showNotification('Task deleted successfully!');
+    } catch (error) {
+        console.error('Error deleting task:', error);
+        showNotification('Failed to delete task', 'error');
+    }
+};
+
+// Update statistics
+function updateStats() {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(task => task.completed).length;
+    const pendingTasks = totalTasks - completedTasks;
+    const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    document.getElementById('totalTasks').textContent = totalTasks;
+    document.getElementById('completedTasks').textContent = completedTasks;
+    document.getElementById('pendingTasks').textContent = pendingTasks;
+    document.getElementById('completionRate').textContent = `${completionRate}%`;
+
+    // Update progress circle
+    const circle = document.getElementById('progressCircle');
+    const circumference = 2 * Math.PI * 50;
+    const strokeDasharray = `${(completionRate / 100) * circumference} ${circumference}`;
+    circle.style.strokeDasharray = strokeDasharray;
+}
+
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', renderTasks);
+document.getElementById('filterSelect').addEventListener('change', renderTasks);
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (event) => {
+    if (event.ctrlKey && event.key === 'k') {
+        event.preventDefault();
+        document.getElementById('searchInput').focus();
+    }
+    
+    if (event.key === 'Escape') {
+        closeModal();
+    }
+    
+    if (event.ctrlKey && event.key === 'n') {
+        event.preventDefault();
+        openModal();
+    }
+});
+
+// Initialize search and filter listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    const filterSelect = document.getElementById('filterSelect');
+    
+    if (searchInput) searchInput.addEventListener('input', renderTasks);
+    if (filterSelect) filterSelect.addEventListener('change', renderTasks);
+});
+</script>
 </body>
 </html>
