@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>To-Do — Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen bg-gray-100 font-inter">
+  <nav class="bg-white shadow sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-6">
+          <div class="text-3xl font-semibold text-blue-900">Dolitto</div>
+          <div class="hidden sm:flex items-center gap-6 text-sm text-gray-600">
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div id="clock" class="text-sm text-gray-600 hidden sm:block"></div>
+          <button id="logoutBtn" class="text-sm px-3 py-2 rounded-md border">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <div id="tab-messages" class="hidden">
+        <h2 class="text-2xl font-semibold mb-4">Messages</h2>
+        <p class="text-gray-500">No messages yet.</p>
+      </div>
+
+      <!-- Today's Task -->
+      <div id="tab-today" class="text-2xl">
+        <b>Schedule your tasks efficiently with Dolitto!!</b>
+      </div>
+
+      <!-- Add Task Button -->
+      <button id="newTaskBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+        + Add Task
+      </button>
+    </header>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-3 items-center mb-6">
+      <button data-filter="all" class="filter-pill active">All <span id="cntAll" class="ml-2 bg-blue-600 text-white rounded-full px-2 py-0.5 text-xs">0</span></button>
+      <button data-filter="open" class="filter-pill">Open <span id="cntOpen" class="ml-2 bg-gray-200 text-gray-700 rounded-full px-2 py-0.5 text-xs">0</span></button>
+      <button data-filter="closed" class="filter-pill">Closed <span id="cntClosed" class="ml-2 bg-gray-200 text-gray-700 rounded-full px-2 py-0.5 text-xs">0</span></button>
+      <button data-filter="archived" class="filter-pill">Archived <span id="cntArchived" class="ml-2 bg-gray-200 text-gray-700 rounded-full px-2 py-0.5 text-xs">0</span></button>
+
+      <div class="ml-auto flex items-center gap-2">
+        <input id="searchBox" type="search" placeholder="Search tasks..." class="rounded-lg border px-3 py-2 w-48 sm:w-64"/>
+        <select id="sortSelect" class="rounded-lg border px-2 py-2">
+          <option value="createdAt">Sort: New</option>
+          <option value="dueDate">Sort: Due Date</option>
+          <option value="priority">Sort: Priority</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <section class="lg:col-span-2">
+        <div id="taskList" class="space-y-4">
+          <!-- task cards inserted here -->
+        </div>
+
+        <div id="emptyState" class="bg-white rounded-2xl p-8 text-center text-gray-500 hidden">
+          No tasks yet. Create a new task to get started.
+        </div>
+      </section>
+
+      <aside class="space-y-4">
+        <div class="bg-white rounded-2xl p-4 shadow">
+          <h3 class="text-sm text-gray-500 mb-2">Stats</h3>
+          <div class="flex gap-4">
+            <div class="text-center">
+              <div id="statTotal" class="text-2xl font-semibold">0</div>
+              <div class="text-xs text-gray-500">Total</div>
+            </div>
+            <div class="text-center">
+              <div id="statOpen" class="text-2xl font-semibold">0</div>
+              <div class="text-xs text-gray-500">Open</div>
+            </div>
+            <div class="text-center">
+              <div id="statDone" class="text-2xl font-semibold">0</div>
+              <div class="text-xs text-gray-500">Done</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow">
+          <h3 class="text-sm text-gray-500 mb-2">Pomodoro</h3>
+          <div class="text-center">
+            <div id="timerDisplay" class="text-3xl font-bold">25:00</div>
+            <div class="flex gap-2 justify-center mt-3">
+              <button id="startTimer" class="px-3 py-1 bg-blue-600 text-white rounded">Start</button>
+              <button id="pauseTimer" class="px-3 py-1 border rounded">Pause</button>
+              <button id="resetTimer" class="px-3 py-1 border rounded">Reset</button>
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+              <div>Work <input id="workMin" type="number" min="1" value="25" class="w-16 rounded border px-2 py-1"/></div>
+              <div>Break <input id="breakMin" type="number" min="1" value="5" class="w-16 rounded border px-2 py-1"/></div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl w-full max-w-lg p-6">
+      <h3 class="text-lg font-semibold mb-3">Add / Edit Task</h3>
+      <form id="taskForm" class="space-y-3">
+        <div>
+          <label class="text-xs text-gray-600">Title</label>
+          <input id="tTitle" required class="w-full rounded-lg border px-3 py-2"/>
+        </div>
+        <div>
+          <label class="text-xs text-gray-600">Subtitle</label>
+          <input id="tSubtitle" class="w-full rounded-lg border px-3 py-2"/>
+        </div>
+        <div class="flex gap-2">
+          <div class="flex-1">
+            <label class="text-xs text-gray-600">Due</label>
+            <input id="tDue" type="datetime-local" class="w-full rounded-lg border px-3 py-2"/>
+          </div>
+          <div>
+            <label class="text-xs text-gray-600">Priority</label>
+            <select id="tPriority" class="rounded-lg border px-3 py-2">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-gray-600">Label</label>
+          <select id="tLabel" class="rounded-lg border px-3 py-2">
+            <option>General</option>
+            <option>Work</option>
+            <option>Personal</option>
+            <option>Urgent</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-gray-600">Reminder</label>
+          <input id="tReminder" type="datetime-local" class="w-full rounded-lg border px-3 py-2"/>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelModal" class="px-4 py-2 border rounded">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+        </div>
+        <input type="hidden" id="editingId"/>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
